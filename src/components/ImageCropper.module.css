@@ -1,0 +1,165 @@
+.cropperContainer {
+  width: 100%;
+  max-width: 600px;
+  background-color: #1f2937;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cropperHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #374151;
+}
+
+.cropperHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  color: white;
+  font-weight: 500;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: white;
+}
+
+.cropperBody {
+  padding: 16px;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  background-color: #111827;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  user-select: none;
+  touch-action: none;
+}
+
+.imageContainer img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  max-width: none;
+  max-height: none;
+  will-change: transform;
+}
+
+.cropOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cropArea {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px dashed white;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+
+.controls {
+  margin-bottom: 16px;
+}
+
+.controlGroup {
+  margin-bottom: 12px;
+}
+
+.controlGroup label {
+  display: block;
+  margin-bottom: 4px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.slider {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  background: #4b5563;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+}
+
+.instructions {
+  margin-top: 16px;
+  color: #9ca3af;
+  font-size: 12px;
+  text-align: center;
+}
+
+.cropperFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid #374151;
+}
+
+.cancelButton {
+  padding: 8px 16px;
+  background-color: transparent;
+  border: 1px solid #4b5563;
+  color: #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: rgba(75, 85, 99, 0.2);
+}
+
+.cropButton {
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cropButton:hover {
+  background-color: #2563eb;
+} 

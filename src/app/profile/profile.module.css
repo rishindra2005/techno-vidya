@@ -1,0 +1,636 @@
+.container {
+  min-height: 100vh;
+  background-color: #111827;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Profile Header */
+.profileHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.profileAvatar {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #374151;
+  margin-right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #4B5563;
+  position: relative;
+}
+
+.avatarInitial {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #D1D5DB;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileName {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.profileEmail {
+  color: #9CA3AF;
+  margin-bottom: 0.5rem;
+}
+
+.profileDetails {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.profileDetail {
+  color: #9CA3AF;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  background-color: #374151;
+  border-radius: 9999px;
+}
+
+/* Message Box */
+.messageBox {
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1.5rem;
+}
+
+.successMessage {
+  background-color: rgba(6, 78, 59, 0.2);
+  border: 1px solid rgba(6, 78, 59, 0.5);
+  color: #34D399;
+}
+
+.errorMessage {
+  background-color: rgba(127, 29, 29, 0.2);
+  border: 1px solid rgba(127, 29, 29, 0.5);
+  color: #F87171;
+}
+
+/* Medical Card */
+.medicalCard {
+  background-color: #1F2937;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.medicalCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: white;
+}
+
+.editButton {
+  padding: 0.375rem 1rem;
+  background-color: #0D9488;
+  color: white;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.editButton:hover {
+  background-color: #0F766E;
+}
+
+.cancelButton {
+  background-color: #4B5563;
+}
+
+.cancelButton:hover {
+  background-color: #374151;
+}
+
+/* Form */
+.medicalForm {
+  padding: 1.5rem;
+}
+
+.formSection {
+  margin-bottom: 1.5rem;
+}
+
+.subsectionTitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #D1D5DB;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.formField {
+  margin-bottom: 1rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  margin-bottom: 0.375rem;
+}
+
+.inputField {
+  width: 100%;
+  padding: 0.625rem;
+  background-color: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 0.375rem;
+  color: white;
+  transition: border-color 0.2s;
+}
+
+.inputField:focus {
+  border-color: #60A5FA;
+  outline: none;
+}
+
+.textArea {
+  width: 100%;
+  padding: 0.625rem;
+  background-color: #374151;
+  border: 1px solid #4B5563;
+  border-radius: 0.375rem;
+  color: white;
+  min-height: 6rem;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.textArea:focus {
+  border-color: #60A5FA;
+  outline: none;
+}
+
+.checkboxGroup {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.checkboxInput {
+  margin-right: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.checkboxLabel {
+  font-size: 0.875rem;
+  color: #D1D5DB;
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .fieldsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .container {
+    padding: 2rem;
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.saveButton {
+  padding: 0.625rem 1.25rem;
+  background-color: #3B82F6;
+  color: white;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.saveButton:hover {
+  background-color: #2563EB;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Medical Info Display */
+.medicalInfo {
+  padding: 1.5rem;
+}
+
+.infoSection {
+  margin-bottom: 2rem;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .infoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.infoItem {
+  padding: 1rem;
+  background-color: #111827;
+  border-radius: 0.375rem;
+  border: 1px solid #374151;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  margin-bottom: 0.5rem;
+}
+
+.infoValue {
+  color: white;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* Disclaimer */
+.disclaimerText {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #9CA3AF;
+  line-height: 1.5;
+}
+
+.disclaimerText p {
+  margin-bottom: 0.375rem;
+}
+
+/* Profile Avatar Container */
+.profileAvatarContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.changePhotoButton {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(16, 163, 127, 0.9);
+  color: white;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  opacity: 0;
+}
+
+.profileAvatarContainer:hover .changePhotoButton {
+  opacity: 1;
+}
+
+.profileAvatarContainer .changePhotoButton:hover {
+  background-color: rgba(13, 148, 115, 0.9);
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #1f2937;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #374151;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: white;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.modalClose:hover {
+  color: white;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-top: 1px solid #374151;
+}
+
+/* Upload Styles */
+.uploadPlaceholder {
+  border: 2px dashed #4b5563;
+  border-radius: 8px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: all 0.2s;
+}
+
+.uploadPlaceholder:hover {
+  border-color: #10a37f;
+  color: #10a37f;
+}
+
+.uploadIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+}
+
+.fileInput {
+  display: none;
+}
+
+/* Profile Preview Styles */
+.profilePreviewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profilePreview {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto;
+  background-color: #4b5563;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cropControls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.controlGroup label {
+  font-size: 0.875rem;
+  color: #d1d5db;
+}
+
+.rangeInput {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  background: #4b5563;
+  border-radius: 2px;
+  outline: none;
+}
+
+.rangeInput::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10a37f;
+  cursor: pointer;
+}
+
+.removeImageBtn {
+  background-color: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  align-self: flex-end;
+}
+
+.removeImageBtn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Button Styles */
+.cancelButton {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid #6b7280;
+  color: #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: rgba(107, 114, 128, 0.1);
+}
+
+.saveButton {
+  padding: 0.5rem 1rem;
+  background-color: #10a37f;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.saveButton:hover {
+  background-color: #0d9473;
+}
+
+.saveButton:disabled {
+  background-color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Avatar overlay and buttons */
+.avatarOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.profileAvatar:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.avatarEditButton, 
+.avatarRemoveButton {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.avatarEditButton:hover, 
+.avatarRemoveButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.profilePicActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  margin-left: 1.5rem;
+}
+
+.profilePicActions .saveButton {
+  padding: 0.375rem 0.75rem;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profilePicActions .saveButton:hover {
+  background-color: #2563EB;
+}
+
+.profilePicActions .saveButton:disabled {
+  background-color: #6B7280;
+  cursor: not-allowed;
+}
+
+.profilePicActions .cancelButton {
+  padding: 0.375rem 0.75rem;
+  background-color: #4B5563;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.profilePicActions .cancelButton:hover {
+  background-color: #374151;
+}
+
+.profilePicActions .cancelButton:disabled {
+  background-color: #6B7280;
+  cursor: not-allowed;
+} 
