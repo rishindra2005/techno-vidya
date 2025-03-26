@@ -29,6 +29,8 @@ export default function Register() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [showCropper, setShowCropper] = useState(false);
+const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -66,7 +68,7 @@ export default function Register() {
     setShowCropper(false);
     setOriginalImage(null);
   };
-  
+
   // Function to cancel cropping
   const handleCancelCrop = () => {
     setShowCropper(false);
@@ -81,6 +83,13 @@ export default function Register() {
     setProfilePic(null);
   };
 
+const togglePasswordVisibility = (field: 'password' | 'confirmPassword') => {
+  if (field === 'password') {
+    setShowPassword(!showPassword);
+  } else {
+    setShowConfirmPassword(!showConfirmPassword);
+  }
+};
   const validateStep1 = () => {
     if (!formData.name) return "Name is required";
     if (!formData.email) return "Email is required";
@@ -129,7 +138,7 @@ export default function Register() {
       };
 
       const response = await axios.post('/api/auth/register', apiData);
-      
+
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -153,7 +162,7 @@ export default function Register() {
           <p className={styles.subtitle}>
             Sign up today to get personalized health guidance and information tailored to your specific medical profile.
           </p>
-          
+
           <div className={styles.features}>
             <div className={styles.feature}>
               <div className={styles.featureIcon}>
@@ -169,7 +178,7 @@ export default function Register() {
                 <p>Create a secure medical profile</p>
               </div>
             </div>
-            
+
             <div className={styles.feature}>
               <div className={styles.featureIcon}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -181,7 +190,7 @@ export default function Register() {
                 <p>Your medical data is protected</p>
               </div>
             </div>
-            
+
             <div className={styles.feature}>
               <div className={styles.featureIcon}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -195,19 +204,19 @@ export default function Register() {
               </div>
             </div>
           </div>
-          
+
           <div className={styles.disclaimer}>
             Not a replacement for professional medical advice. Always consult with healthcare professionals for medical concerns.
           </div>
         </div>
       </div>
-      
+
       <div className={styles.rightPanel}>
         <div className={styles.formContainer}>
           <div className={styles.formHeader}>
             <h2>Create Your Account</h2>
             <p>Begin your health journey with Techno Vaidhya</p>
-            
+
             {step === 1 ? (
               <div className={styles.stepIndicator}>
                 <div className={styles.stepActive}>Account Information</div>
@@ -222,13 +231,13 @@ export default function Register() {
               </div>
             )}
           </div>
-          
+
           {error && (
             <div className={styles.errorMessage}>
               {error}
             </div>
           )}
-          
+
           <form onSubmit={step === 1 ? (e) => { e.preventDefault(); nextStep(); } : handleSubmit} className={styles.form}>
             {step === 1 ? (
               // Step 1: Account Information
@@ -254,7 +263,7 @@ export default function Register() {
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="email" className={styles.formLabel}>
                     Email Address
@@ -276,7 +285,7 @@ export default function Register() {
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="password" className={styles.formLabel}>
                     Password
@@ -287,7 +296,7 @@ export default function Register() {
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       name="password"
                       value={formData.password}
@@ -297,10 +306,27 @@ export default function Register() {
                       className={styles.input}
                       minLength={6}
                     />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('password')}
+                      className={styles.passwordToggle}
+                    >
+                      {showPassword ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.passwordToggleIcon}>
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.passwordToggleIcon}>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
                   <p className={styles.passwordHint}>Password must be at least 6 characters</p>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="confirmPassword" className={styles.formLabel}>
                     Confirm Password
@@ -311,7 +337,7 @@ export default function Register() {
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       id="confirmPassword"
                       name="confirmPassword"
                       value={formData.confirmPassword}
@@ -320,6 +346,23 @@ export default function Register() {
                       placeholder="Confirm your password"
                       className={styles.input}
                     />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('confirmPassword')}
+                      className={styles.passwordToggle}
+                    >
+                      {showConfirmPassword ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.passwordToggleIcon}>
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.passwordToggleIcon}>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
                 </div>
 
@@ -336,7 +379,7 @@ export default function Register() {
                       className={styles.fileInput}
                       key={profilePic ? 'has-file' : 'no-file'}
                     />
-                    
+
                     {!profilePic ? (
                       <div className={styles.uploadPlaceholder} onClick={triggerFileInput}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.uploadIcon}>
@@ -366,7 +409,7 @@ export default function Register() {
                     )}
                   </div>
                 </div>
-                
+
                 <button
                   type="submit"
                   className={styles.submitButton}
@@ -395,7 +438,7 @@ export default function Register() {
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="gender" className={styles.formLabel}>
                     Gender
@@ -416,7 +459,7 @@ export default function Register() {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="medicalHistory" className={styles.formLabel}>
                     Medical History (Optional)
@@ -431,7 +474,7 @@ export default function Register() {
                     rows={3}
                   ></textarea>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="conditions" className={styles.formLabel}>
                     Medical Conditions (Optional)
@@ -448,7 +491,7 @@ export default function Register() {
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="medications" className={styles.formLabel}>
                     Current Medications (Optional)
@@ -465,7 +508,7 @@ export default function Register() {
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label htmlFor="allergies" className={styles.formLabel}>
                     Allergies (Optional)
@@ -482,7 +525,7 @@ export default function Register() {
                     />
                   </div>
                 </div>
-                
+
                 <div className={styles.formActions}>
                   <button
                     type="button"
@@ -511,7 +554,7 @@ export default function Register() {
               </>
             )}
           </form>
-          
+
           <div className={styles.formFooter}>
             <p>
               Already have an account?{' '}
@@ -535,4 +578,4 @@ export default function Register() {
       )}
     </div>
   );
-} 
+}

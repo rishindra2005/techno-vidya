@@ -76,5 +76,113 @@
     },
     "id": "1742713157403",
     "createdAt": "2025-03-23T06:59:17.403Z"
+  },
+  {
+    "email": "somethingsomething@gmail.com",
+    "password": "$2b$10$rYn400o/ak/8SY3ZCs2CP.ghLSnw3gl9vO9BT/QlaoYUFx1IJEJya",
+    "name": "Atharva Sachin Sanpurkar",
+    "gender": "male",
+    "age": "25",
+    "medicalData": {
+      "medicalHistory": "NA",
+      "conditions": [
+        "NA"
+      ],
+      "medications": [
+        "NA"
+      ],
+      "allergies": [
+        "NA"
+      ]
+    },
+    "id": "1742988992637",
+    "createdAt": "2025-03-26T11:36:32.637Z"
+  },
+  {
+    "email": "gfsg@gmail.com",
+    "password": "$2b$10$98fqCNxHzdGcDLGvpkRkWOU3ea3tJEGnFUgA16jnFW.osBgfOwPhq",
+    "name": "ram",
+    "gender": "male",
+    "age": "18",
+    "medicalData": {
+      "medicalHistory": "various problems with my health",
+      "conditions": [
+        "diabetes hypertension"
+      ],
+      "medications": [],
+      "allergies": [
+        "milk"
+      ]
+    },
+    "id": "1742989020540",
+    "createdAt": "2025-03-26T11:37:00.540Z"
+  },
+  {
+    "email": "chaipatti@gmail.com",
+    "password": "$2b$10$0/LlIyJguY/waUiF9nDwfOsAaOsZwIr6yIoO/oaPwGxnHjDs859lq",
+    "name": " Chai chai",
+    "gender": "other",
+    "age": "23",
+    "medicalData": {
+      "medicalHistory": "I'm a young 23 year old non diabetic, non cholestrol but a lot of weakness and acid reflux",
+      "conditions": [
+        "NA"
+      ],
+      "medications": [
+        "NA"
+      ],
+      "allergies": [
+        "NA"
+      ]
+    },
+    "id": "1742993150155",
+    "createdAt": "2025-03-26T12:45:50.155Z"
+  },
+  {
+    "email": "ddd2@gmail.com",
+    "password": "$2b$10$E/eDc40Ij3BIwILHadSbiuX8RHUfTVs0nxK/7B51k8AgBs/hVVv5q",
+    "name": "ram",
+    "gender": "male",
+    "age": "18",
+    "medicalData": {
+      "medicalHistory": "cardiac abnormalities",
+      "conditions": [
+        "diabetes"
+      ],
+      "medications": [],
+      "allergies": [
+        "milk"
+      ]
+    },
+    "id": "1743000844288",
+    "createdAt": "2025-03-26T14:54:04.288Z"
+  },
+  {
+    "email": "ram2@gmail.com",
+    "password": "$2b$10$TOTfxX144kWsBGkGWZUHLu2nknEIuVsUmMPQnm5Gre3c.C4povijC",
+    "name": "rishi",
+    "gender": "male",
+    "age": "18",
+    "medicalData": {
+      "conditions": [],
+      "medications": [],
+      "allergies": []
+    },
+    "id": "1743002506590",
+    "createdAt": "2025-03-26T15:21:46.590Z"
+  },
+  {
+    "email": "hari12@gmail.com",
+    "password": "$2b$10$H1woCde2r/vb.3eXdGwhwOISkZF/dN9eSn/kdrs5ToUZ4kf6y54nu",
+    "name": "Hari",
+    "gender": "male",
+    "age": "19",
+    "medicalData": {
+      "conditions": [],
+      "medications": [],
+      "allergies": []
+    },
+    "id": "1743002719682",
+    "createdAt": "2025-03-26T15:25:19.682Z"
   }
 ]

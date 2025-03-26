@@ -229,7 +229,38 @@
 .input::placeholder {
   color: #6b7280;
 }
+.passwordToggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.passwordToggleIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.passwordToggle:hover .passwordToggleIcon {
+  color: #d1d5db;
+}
+
+.passwordToggle:focus {
+  outline: none;
+}
+
+.passwordToggle:focus .passwordToggleIcon {
+  color: #60a5fa;
+}
 .submitButton {
   background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
   color: white;
@@ -317,12 +348,12 @@
   .leftPanel {
     display: block;
   }
-  
+
   .rightPanel {
     padding: 2rem;
   }
-  
+
   .formContainer {
     padding: 2.5rem;
   }
-} 
+}

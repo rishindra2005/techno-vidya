@@ -8,7 +8,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Use the newer model name
-const MODEL_NAME = 'gemini-1.5-flash';
+const MODEL_NAME = 'gemini-2.0-flash';
 
 // Base system prompt for medical virtual assistant
 const BASE_SYSTEM_PROMPT = `You are Techno Vaidhya, a virtual medical assistant. 
