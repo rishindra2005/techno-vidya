@@ -7,15 +7,12 @@ import remarkGfm from 'remark-gfm';
 import axios from 'axios';
 import styles from './ChatInterface.module.css';
 import Link from 'next/link';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
-  image?: string | null;
 }
 
 export interface ChatSession {
@@ -49,9 +46,6 @@ export default function ChatInterface() {
     weight: '',
     age: ''
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -59,57 +53,120 @@ export default function ChatInterface() {
   
   // Check authentication and load sessions
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (!token) {
-      router.push('/login');
-      return;
-    }
+    const fetchChatSessions = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
 
-    if (userData) {
       try {
-        setUser(JSON.parse(userData));
-      } catch (e) {
-        // Invalid user data in localStorage
-        localStorage.removeItem('user');
-      }
-    }
-    
-    // Load saved sessions from localStorage
-    const savedSessions = localStorage.getItem('chatSessions');
-    if (savedSessions) {
-      try {
-        const parsedSessions = JSON.parse(savedSessions);
-        if (Array.isArray(parsedSessions) && parsedSessions.length > 0) {
-          setSessions(parsedSessions);
-          setActiveSessionIndex(0);
-          setSessionId(parsedSessions[0].id);
-          setMessages(parsedSessions[0].messages);
-          return;
+        // Fetch user data
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        setUser(userData);
+
+        // Load chat sessions from API
+        console.log('Fetching chat sessions from API...');
+        const response = await axios.get('/api/chat/sessions', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data && response.data.sessions) {
+          console.log(`Retrieved ${response.data.sessions.length} sessions from API`);
+          const apiSessions = response.data.sessions.map((session: any) => ({
+            id: session.id,
+            messages: session.messages.map((msg: any) => ({
+              id: msg.id,
+              role: msg.role,
+              content: msg.content,
+              timestamp: msg.timestamp
+            })),
+            title: session.messages.find((msg: any) => msg.role === 'user')?.content.substring(0, 30) || 'New chat'
+          }));
+
+          // If no sessions exist, create a default one
+          if (apiSessions.length === 0) {
+            console.log('No sessions found, creating default session');
+            const defaultSession = {
+              id: Date.now().toString(),
+              messages: [
+                {
+                  id: '0',
+                  role: 'assistant' as const,
+                  content: '## Welcome to Techno Vaidhya!\n\nI\'m your virtual medical assistant. How can I help you today?\n\n**You can ask me about:**\n- General health advice\n- Common symptoms\n- Preventive care\n- When to see a doctor\n\n>',
+                  timestamp: new Date().toISOString()
+                }
+              ],
+              title: 'New chat'
+            };
+            setSessions([defaultSession]);
+            setActiveSessionIndex(0);
+            setSessionId(null); // This will be set by the server when first message is sent
+            setMessages(defaultSession.messages);
+          } else {
+            // Use sessions from API
+            setSessions(apiSessions);
+            setActiveSessionIndex(0);
+            setSessionId(apiSessions[0].id);
+            setMessages(apiSessions[0].messages);
+          }
         }
-      } catch (e) {
-        console.error('Error parsing saved sessions:', e);
-        localStorage.removeItem('chatSessions');
+      } catch (error) {
+        console.error('Error fetching chat sessions:', error);
+        
+        // Fallback to local storage or create default session
+        const defaultSession = {
+          id: Date.now().toString(),
+          messages: [
+            {
+              id: '0',
+              role: 'assistant' as const,
+              content: '## Welcome to Techno Vaidhya!\n\nI\'m your virtual medical assistant. How can I help you today?\n\n**You can ask me about:**\n- General health advice\n- Common symptoms\n- Preventive care\n- When to see a doctor\n\n>',
+              timestamp: new Date().toISOString()
+            }
+          ],
+          title: 'New chat'
+        };
+        setSessions([defaultSession]);
+        setActiveSessionIndex(0);
+        setSessionId(null);
+        setMessages(defaultSession.messages);
       }
+    };
+
+    // Initialize sidebar as hidden
+    if (typeof window !== 'undefined') {
+      setShowSidebar(false);
     }
     
-    // Create a new session if none exist
-    createNewSession();
+    // Fetch chat sessions
+    fetchChatSessions();
+    
+    // Add a resize listener to close sidebar on smaller screens
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile && showSidebar) {
+        setShowSidebar(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Create a new chat session
-  const createNewSession = () => {
+  const createNewSession = async () => {
+    const welcomeMessage = {
+      id: `local_${Date.now()}`,
+      role: 'assistant' as const,
+      content: '## Welcome to Techno Vaidhya!\n\nI\'m your virtual medical assistant. How can I help you today?\n\n**You can ask me about:**\n- General health advice\n- Common symptoms\n- Preventive care\n- When to see a doctor\n\n>',
+      timestamp: new Date().toISOString()
+    };
+    
+    // Create a temporary local session (will be replaced with server session ID after first message)
     const newSession: ChatSession = {
-      id: Date.now().toString(),
-      messages: [
-        {
-          id: '0',
-          role: 'assistant',
-          content: '## Welcome to Techno Vaidhya!\n\nI\'m your virtual medical assistant. How can I help you today?\n\n**You can ask me about:**\n- General health advice\n- Common symptoms\n- Preventive care\n- When to see a doctor\n\n>',
-          timestamp: new Date().toISOString()
-        }
-      ],
+      id: `local_${Date.now()}`,
+      messages: [welcomeMessage],
       title: 'New chat'
     };
     
@@ -120,12 +177,9 @@ export default function ChatInterface() {
     // Set active session to the new one
     const newIndex = updatedSessions.length - 1;
     setActiveSessionIndex(newIndex);
-    setSessionId(newSession.id);
+    setSessionId(null); // Will be set by server after first message
     setMessages(newSession.messages);
     setInput('');
-    
-    // Save to localStorage
-    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
     
     // Focus the input
     setTimeout(() => {
@@ -144,9 +198,51 @@ export default function ChatInterface() {
   };
 
   // Delete a session
-  const deleteSession = (index: number, e: React.MouseEvent) => {
+  const deleteSession = async (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Get the session ID to delete
+    const sessionToDelete = sessions[index];
+    
+    if (!sessionToDelete.id) {
+      console.error("Cannot delete session with no ID");
+      return;
+    }
+    
+    // If it's a local-only session with no server ID, just remove it from state
+    if (sessionToDelete.id.startsWith('local_')) {
+      handleLocalSessionDelete(index);
+      return;
+    }
+    
+    try {
+      setError('');
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+      
+      // Call the API to delete the session
+      const response = await axios.delete(`/api/chat/${sessionToDelete.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.status === 200) {
+        console.log(`Successfully deleted session ${sessionToDelete.id}`);
+        
+        // Update local state after successful deletion
+        handleLocalSessionDelete(index);
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      setError('Failed to delete chat session. Please try again.');
+    }
+  };
+
+  // Helper function to handle local state updates after deletion
+  const handleLocalSessionDelete = (index: number) => {
     if (sessions.length <= 1) {
       // Don't delete the last session, just clear it
       clearChat();
@@ -167,29 +263,13 @@ export default function ChatInterface() {
       // If we deleted a session before the active one, adjust the index
       setActiveSessionIndex(activeSessionIndex - 1);
     }
-    
-    // Save to localStorage
-    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
   };
 
-  // Clear the current chat
+  // Clear the current chat by creating a new session
   const clearChat = () => {
-    const welcomeMessage = {
-      id: '0',
-      role: 'assistant' as const,
-      content: '## Welcome to Techno Vaidhya!\n\nI\'m your virtual medical assistant. How can I help you today?\n\n**You can ask me about:**\n- General health advice\n- Common symptoms\n- Preventive care\n- When to see a doctor\n\n>',
-      timestamp: new Date().toISOString()
-    };
-    
-    const updatedSessions = [...sessions];
-    updatedSessions[activeSessionIndex].messages = [welcomeMessage];
-    updatedSessions[activeSessionIndex].title = 'New chat';
-    
-    setSessions(updatedSessions);
-    setMessages([welcomeMessage]);
-    
-    // Save to localStorage
-    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
+    // Instead of clearing the existing session, we'll just create a new one
+    // This way we maintain server-side session history
+    createNewSession();
   };
 
   // Update session title based on first user message
@@ -205,17 +285,14 @@ export default function ChatInterface() {
       
       setSessions(updatedSessions);
       
-      // Save to localStorage
-      localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
+      // No need to save to localStorage as sessions are stored on the server
+      // The title will be visible in the UI immediately from the state update
     } else {
       // Just update the messages
       const updatedSessions = [...sessions];
       updatedSessions[activeSessionIndex].messages = newMessages;
       
       setSessions(updatedSessions);
-      
-      // Save to localStorage
-      localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
     }
   };
 
@@ -231,25 +308,6 @@ export default function ChatInterface() {
       inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
     }
   }, [input]);
-
-  // Update the useEffect hook that runs on component mount
-  useEffect(() => {
-    // Always initialize sidebar as hidden
-    if (typeof window !== 'undefined') {
-      setShowSidebar(false);
-    }
-    
-    // Add a resize listener to close sidebar on smaller screens
-    const handleResize = () => {
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile && showSidebar) {
-        setShowSidebar(false);
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -283,19 +341,29 @@ export default function ChatInterface() {
       const textarea = document.querySelector('textarea');
       if (textarea) textarea.style.height = 'auto';
       
-      // Send message to API
+      // Send message to API with the current sessionId
       const response = await axios.post('/api/chat', 
-        { message: input },
+        { 
+          message: input,
+          sessionId: sessionId // Include the current sessionId
+        },
         { headers: { Authorization: `Bearer ${token}` }}
       );
       
+      // Get the returned sessionId
       if (!response.data.sessionId) {
         throw new Error('Failed to get session ID');
       }
       
-      // Set session ID if it's a new session
+      // Set session ID if it's a new conversation
       if (!sessionId) {
         setSessionId(response.data.sessionId);
+        
+        // Update the current session with the server-provided ID
+        const updatedSessions = [...sessions];
+        updatedSessions[activeSessionIndex].id = response.data.sessionId;
+        setSessions(updatedSessions);
+        localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
       }
       
       // Add assistant response to messages
@@ -309,9 +377,10 @@ export default function ChatInterface() {
       const newMessages = [...updatedMessages, assistantMessage];
       setMessages(newMessages);
       updateSessionTitle(newMessages);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
-      console.error('Chat error:', err);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Failed to send message. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -626,182 +695,6 @@ export default function ChatInterface() {
     }
   }, [showVitalsModal, user]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedImage(file);
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const triggerFileUpload = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const removeImage = () => {
-    setSelectedImage(null);
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!input.trim() && !selectedImage) return;
-    
-    const currentMessage = input;
-    setInput('');
-    
-    // Create a new message with correct properties
-    const newUserMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: currentMessage,
-      timestamp: new Date().toISOString(),
-      image: imagePreview
-    };
-    
-    // Add message to state
-    setMessages(prev => [...prev, newUserMessage]);
-    
-    try {
-      setIsLoading(true);
-      
-      let response;
-      
-      if (selectedImage) {
-        // Convert image to base64
-        const reader = new FileReader();
-        const imagePromise = new Promise<string>((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(selectedImage);
-        });
-        
-        const imageBase64 = await imagePromise;
-        const imageData = imageBase64.split(',')[1]; // Remove the data:image/jpeg;base64, part
-        
-        // Send to API with image
-        response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            message: currentMessage,
-            sessionId: sessionId,
-            image: {
-              data: imageData,
-              mimeType: selectedImage.type,
-              fileName: selectedImage.name
-            }
-          })
-        });
-        
-        // Clear image after sending
-        removeImage();
-      } else {
-        // Regular text message
-        response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            message: currentMessage,
-            sessionId: sessionId
-          })
-        });
-      }
-      
-      const data = await response.json();
-      
-      setSessionId(data.sessionId);
-      localStorage.setItem('sessionId', data.sessionId);
-      
-      // Create a new assistant message with correct properties
-      const newAssistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.message,
-        timestamp: new Date().toISOString()
-      };
-      
-      // Add assistant message to state
-      setMessages(prev => [...prev, newAssistantMessage]);
-      
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const [selectedViewImage, setSelectedViewImage] = useState<string | null>(null);
-
-  const renderMessage = (message: Message) => {
-    return (
-      <div
-        key={message.id}
-        className={`${styles.message} ${
-          message.role === 'assistant' ? styles.assistantMessage : styles.userMessage
-        }`}
-      >
-        <div className={styles.messageContent}>
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              pre({ node, ...props }) {
-                return <pre className={styles.codeBlock} {...props} />;
-              },
-              code({ node, className, children, ...props }) {
-                return className ? (
-                  <SyntaxHighlighter
-                    language={className.replace('language-', '')}
-                    style={vscDarkPlus}
-                    customStyle={{ background: '#1a1a1a', borderRadius: '0.5rem' }}
-                    {...props}
-                  >
-                    {String(children).replace(/\n$/, '')}
-                  </SyntaxHighlighter>
-                ) : (
-                  <code className={styles.inlineCode} {...props}>
-                    {children}
-                  </code>
-                );
-              },
-            }}
-          >
-            {message.content}
-          </ReactMarkdown>
-          
-          {/* Display image if present */}
-          {message.image && (
-            <div>
-              <img 
-                src={message.image} 
-                alt="Attached image" 
-                className={styles.messageImage}
-                onClick={() => message.image && setSelectedViewImage(message.image)} 
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className={styles.chatContainer} ref={chatContainerRef}>
       {/* Sidebar overlay - closes sidebar when clicked */}
@@ -945,98 +838,139 @@ export default function ChatInterface() {
         </div>
         
         {/* Messages Container */}
-        <div className={styles.messagesContainer} ref={messagesEndRef}>
-          {messages.map(message => renderMessage(message))}
-          <div ref={messagesEndRef} />
-        </div>
-        
-        {/* Image modal for viewing larger images */}
-        {selectedViewImage && (
-          <div 
-            className={styles.imageModal}
-            onClick={() => setSelectedViewImage(null)}
-          >
-            <img 
-              src={selectedViewImage} 
-              alt="Full size" 
-              className={styles.modalImage} 
-            />
-            <button 
-              className={styles.imageModalClose}
-              onClick={() => setSelectedViewImage(null)}
-            >
-              ×
-            </button>
-          </div>
-        )}
-        
-        {/* Input Area */}
-        <div className={`${styles.inputContainer} ${showSidebar ? styles.withSidebar : ''}`}>
-          {/* Image Preview */}
-          {imagePreview && (
-            <div className={styles.imagePreviewContainer}>
-              <div className={styles.imagePreview}>
-                <img src={imagePreview} alt="Preview" />
-                <button 
-                  onClick={removeImage}
-                  className={styles.removeImageBtn}
-                  aria-label="Remove image"
-                >
-                  ×
-                </button>
+        <div className={styles.messagesContainer}>
+          {error && (
+            <div className={`${styles.message} ${styles.assistantMessage}`} style={{backgroundColor: 'rgba(239, 68, 68, 0.2)'}}>
+              <div className={styles.messageContent}>
+                <div className={styles.assistantAvatar} style={{backgroundColor: '#ef4444'}}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
+                <div className={styles.messageBody}>
+                  {error}
+                </div>
               </div>
             </div>
           )}
           
-          <div className={styles.inputWrapper}>
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleInputKeyDown}
-              disabled={isLoading}
-              placeholder="Message Techno Vaidhya..."
-              className={styles.inputField}
-              rows={1}
-            />
-            
-            {/* Upload Image Button */}
-            <button 
-              onClick={triggerFileUpload} 
-              className={styles.uploadButton}
-              aria-label="Upload image"
-              title="Upload image (Beta feature - image analysis is being implemented)"
+          {messages.map((message, index) => (
+            <div
+              key={message.id}
+              className={`${styles.message} ${
+                message.role === 'user' ? styles.userMessage : styles.assistantMessage
+              }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M5 12h14"></path>
-              </svg>
-            </button>
-            
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              accept="image/*"
-              className={styles.fileInput}
-              capture="environment"
-            />
-            
-            <button
-              onClick={handleSendMessage}
-              className={styles.sendButton}
-              disabled={isLoading || !input.trim()}
-              aria-label="Send message"
-            >
-              {isLoading ? (
-                <div className={styles.loadingSpinner}></div>
-              ) : (
+              <div className={styles.messageContent}>
+                {message.role === 'assistant' ? (
+                  <div className={styles.assistantAvatar}>
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.avatarIcon}>
+                      <path d="M9 11.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" fill="currentColor" />
+                      <path d="M15 11.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" fill="currentColor" />
+                      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M7.5 16.5a4.5 4.5 0 0 1 9 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className={styles.userAvatar}>
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.avatarIcon}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                )}
+                <div className={styles.messageBody}>
+                  <div className={styles.messageText}>
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({node, ...props}) => <p className={markdownStyles.p} {...props} />,
+                        h1: ({node, ...props}) => <h1 className={markdownStyles.h1} {...props} />,
+                        h2: ({node, ...props}) => <h2 className={markdownStyles.h2} {...props} />,
+                        h3: ({node, ...props}) => <h3 className={markdownStyles.h3} {...props} />,
+                        h4: ({node, ...props}) => <h4 className={markdownStyles.h4} {...props} />,
+                        ul: ({node, ...props}) => <ul className={markdownStyles.ul} {...props} />,
+                        ol: ({node, ...props}) => <ol className={markdownStyles.ol} {...props} />,
+                        li: ({node, ...props}) => <li className={markdownStyles.li} {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className={markdownStyles.blockquote} {...props} />,
+                        code: ({...props}) => {
+                          if (props.className?.includes('language-')) {
+                            return <pre className={markdownStyles.pre}><code {...props} /></pre>;
+                          }
+                          return <code className={markdownStyles.code} {...props} />;
+                        },
+                        a: ({node, ...props}) => <a className={markdownStyles.a} target="_blank" rel="noopener noreferrer" {...props} />,
+                        strong: ({node, ...props}) => <strong className={markdownStyles.strong} {...props} />,
+                        em: ({node, ...props}) => <em className={markdownStyles.em} {...props} />,
+                        table: ({node, ...props}) => <table className={markdownStyles.table} {...props} />,
+                        th: ({node, ...props}) => <th className={markdownStyles.th} {...props} />,
+                        td: ({node, ...props}) => <td className={markdownStyles.td} {...props} />,
+                        hr: ({node, ...props}) => <hr className={markdownStyles.hr} {...props} />,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {isLoading && (
+            <div className={`${styles.message} ${styles.assistantMessage}`}>
+              <div className={styles.messageContent}>
+                <div className={styles.assistantAvatar}>
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.avatarIcon}>
+                    <path d="M9 11.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" fill="currentColor" />
+                    <path d="M15 11.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" fill="currentColor" />
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7.5 16.5a4.5 4.5 0 0 1 9 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className={styles.messageBody}>
+                  <div className={styles.loadingIndicator}>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Ref for auto-scrolling */}
+          <div ref={messagesEndRef} className="h-4" />
+        </div>
+        
+        {/* Input Area */}
+        <div className={`${styles.inputContainer} ${showSidebar ? styles.withSidebar : ''}`}>
+          <form onSubmit={handleSubmit} className={styles.inputForm}>
+            <div className={styles.inputWrapper}>
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleInputKeyDown}
+                disabled={isLoading}
+                placeholder="Message Techno Vaidhya..."
+                className={styles.inputField}
+                rows={1}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className={styles.sendButton}
+                aria-label="Send message"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.sendIcon}>
                   <line x1="22" y1="2" x2="11" y2="13"></line>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
-              )}
-            </button>
-          </div>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
       

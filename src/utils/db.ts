@@ -46,7 +46,6 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
-  image?: string; // Optional image data URL
 }
 
 export interface ChatSession {
@@ -101,26 +100,54 @@ export const createUser = (user: Omit<User, 'id' | 'createdAt'>): User => {
 
 // Chat operations
 export const getChatSessions = (): ChatSession[] => {
-  if (!fs.existsSync(chatHistoryPath)) {
-    fs.writeFileSync(chatHistoryPath, '[]');
+  try {
+    if (!fs.existsSync(chatHistoryPath)) {
+      fs.writeFileSync(chatHistoryPath, '[]');
+      return [];
+    }
+    const data = fs.readFileSync(chatHistoryPath, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading chat sessions:', error);
     return [];
   }
-  const data = fs.readFileSync(chatHistoryPath, 'utf-8');
-  return JSON.parse(data);
 };
 
 export const saveChatSessions = (sessions: ChatSession[]): void => {
-  fs.writeFileSync(chatHistoryPath, JSON.stringify(sessions, null, 2));
+  try {
+    // Sort messages by timestamp to ensure proper order
+    const sortedSessions = sessions.map(session => ({
+      ...session,
+      messages: session.messages.sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      )
+    }));
+    
+    fs.writeFileSync(chatHistoryPath, JSON.stringify(sortedSessions, null, 2));
+  } catch (error) {
+    console.error('Error saving chat sessions:', error);
+  }
 };
 
 export const getChatSessionsByUserId = (userId: string): ChatSession[] => {
   const sessions = getChatSessions();
-  return sessions.filter(session => session.userId === userId);
+  return sessions
+    .filter(session => session.userId === userId)
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 };
 
 export const getChatSessionById = (id: string): ChatSession | undefined => {
   const sessions = getChatSessions();
-  return sessions.find(session => session.id === id);
+  const session = sessions.find(session => session.id === id);
+  
+  if (session) {
+    // Sort messages by timestamp to ensure proper order
+    session.messages.sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+  }
+  
+  return session;
 };
 
 export const createChatSession = (userId: string): ChatSession => {
@@ -152,9 +179,18 @@ export const addMessageToChatSession = (sessionId: string, message: Omit<ChatMes
     timestamp: new Date().toISOString()
   };
   
+  // Add new message to the session
   sessions[sessionIndex].messages.push(newMessage);
   sessions[sessionIndex].updatedAt = new Date().toISOString();
   
+  // Save all sessions
   saveChatSessions(sessions);
-  return sessions[sessionIndex];
+  
+  // Return the updated session with all messages in correct order
+  return {
+    ...sessions[sessionIndex],
+    messages: sessions[sessionIndex].messages.sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
+  };
 }; 

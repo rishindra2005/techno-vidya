@@ -5,15 +5,10 @@ import {
   addMessageToChatSession, 
   createChatSession,
   ChatMessage,
-  getUserById
+  getUserById,
+  getChatSessionsByUserId
 } from '@/utils/db';
 import { generateResponse, formatChatForAPI } from '@/utils/gemini';
-
-interface ImageData {
-  data: string; // base64 encoded image
-  mimeType: string;
-  fileName: string;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,29 +42,36 @@ export async function POST(request: NextRequest) {
     }
 
     // Get request body
-    const { message, sessionId, image } = await request.json();
+    const { message, sessionId } = await request.json();
     
-    if (!message && !image) {
+    if (!message) {
       return NextResponse.json(
-        { error: 'Message or image is required' },
+        { error: 'Message is required' },
         { status: 400 }
       );
     }
+
+    console.log(`Processing message: "${message.slice(0, 30)}${message.length > 30 ? '...' : ''}"`);
+    console.log(`Session ID from request: ${sessionId || 'none'}`);
 
     // Get or create chat session
     let session = sessionId ? getChatSessionById(sessionId) : null;
     
     if (!session) {
+      console.log('Creating new chat session...');
       session = createChatSession(decodedToken.id);
+      console.log(`New session created with ID: ${session.id}`);
+    } else {
+      console.log(`Using existing session with ID: ${session.id}`);
+      console.log(`Session has ${session.messages.length} existing messages`);
     }
 
     // Add user message to chat session
-    addMessageToChatSession(session.id, {
+    console.log('Adding user message to chat session...');
+    const sessionWithUserMessage = addMessageToChatSession(session.id, {
       userId: decodedToken.id,
       role: 'user',
-      content: message,
-      // If there's an image, include its data URL to display in the chat
-      image: image ? `data:${image.mimeType};base64,${image.data}` : undefined
+      content: message
     });
 
     try {
@@ -79,6 +81,8 @@ export async function POST(request: NextRequest) {
         throw new Error('Session not found after adding user message');
       }
 
+      console.log(`Retrieved updated session with ${updatedSession.messages.length} messages`);
+
       // Convert messages to the format expected by our Gemini API
       const messageHistory = updatedSession.messages.map((msg: ChatMessage) => ({
         role: msg.role,
@@ -87,6 +91,7 @@ export async function POST(request: NextRequest) {
       
       // Format messages for the API
       const formattedHistory = formatChatForAPI(messageHistory);
+      console.log(`Formatted history has ${formattedHistory.length} messages`);
       
       // Prepare user data for personalized responses
       const userData = {
@@ -97,14 +102,19 @@ export async function POST(request: NextRequest) {
       };
       
       // Generate response from Gemini with user context
-      const aiResponse = await generateResponse(message, formattedHistory, userData, image as ImageData | undefined);
+      console.log('Generating AI response...');
+      const aiResponse = await generateResponse(message, formattedHistory, userData);
+      console.log('AI response generated successfully');
 
       // Add assistant message to chat session
+      console.log('Adding AI response to chat session...');
       const finalSession = addMessageToChatSession(updatedSession.id, {
         userId: decodedToken.id,
         role: 'assistant',
         content: aiResponse
       });
+
+      console.log(`Final session has ${finalSession.messages.length} messages`);
 
       // Return response
       return NextResponse.json({

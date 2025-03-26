@@ -35,8 +35,6 @@ export const generateToken = (user: Omit<User, 'password'>): string => {
     name: user.name
   };
   
-  console.log('Generating token with payload:', JSON.stringify(payload, null, 2));
-  
   return jwt.sign(
     payload,
     JWT_SECRET,
@@ -46,11 +44,7 @@ export const generateToken = (user: Omit<User, 'password'>): string => {
 
 export const verifyToken = (token: string): any => {
   try {
-    console.log('Verifying token...');
-    const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('Token verified successfully');
-    console.log('Token payload:', JSON.stringify(decoded, null, 2));
-    return decoded;
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
     console.error('Token verification failed:', error);
     return null;

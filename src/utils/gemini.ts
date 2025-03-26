@@ -8,14 +8,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Use the newer model name
-const MODEL_NAME = 'gemini-2.0-flash';
-
-// Interface for image data
-interface ImageData {
-  data: string; // base64 encoded image
-  mimeType: string;
-  fileName: string;
-}
+const MODEL_NAME = 'gemini-1.5-flash';
 
 // Base system prompt for medical virtual assistant
 const BASE_SYSTEM_PROMPT = `You are Techno Vaidhya, a virtual medical assistant. 
@@ -108,8 +101,7 @@ const getSystemPrompt = (userData?: UserData): string => {
 export async function generateResponse(
   message: string,
   chatHistory: { role: string; content: string }[],
-  userData?: UserData,
-  imageData?: ImageData
+  userData?: UserData
 ): Promise<string> {
   try {
     const generationConfig = {
@@ -122,60 +114,34 @@ export async function generateResponse(
     // Generate the personalized system prompt based on user data
     const systemPrompt = getSystemPrompt(userData);
 
-    // Format the history correctly for the API
-    const formattedHistory = chatHistory.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [
-        { text: msg.content }
-      ]
-    }));
-
-    // Initialize the model with system instruction
     const model = genAI.getGenerativeModel({
       model: MODEL_NAME,
+      generationConfig,
       systemInstruction: systemPrompt,
     });
 
-    // Create a chat session
+    // Format history according to the new structure
+    const formattedHistory = chatHistory.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }]
+    }));
+
+    // Log formatted history for debugging
+    console.log('====== FORMATTED CHAT HISTORY ======');
+    console.log(JSON.stringify(formattedHistory, null, 2));
+    console.log('====================================');
+    
+    
+
+    // Initialize chat with properly formatted history
     const chatSession = model.startChat({
       generationConfig,
       history: formattedHistory,
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        },
-      ],
     });
 
-    let result;
-    
-    // Handle based on whether we have an image or not
-    if (imageData) {
-      // For now, we'll include a note about the image but won't process it
-      // This is because the current version of the API doesn't fully support image data in this format
-      const imageNote = "Note: The user has uploaded an image. Please note that image analysis is currently limited.";
-      const messageWithNote = message ? `${message}\n\n${imageNote}` : imageNote;
-      
-      // Send text only for now
-      result = await chatSession.sendMessage(messageWithNote);
-    } else {
-      // Text only
-      result = await chatSession.sendMessage(message);
-    }
-    
+    // Send the message
+    console.log('Sending message to Gemini:', message);
+    const result = await chatSession.sendMessage(message);
     return result.response.text();
   } catch (error) {
     console.error("Error generating response:", error);
