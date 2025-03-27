@@ -154,6 +154,19 @@ export default function Home() {
             </svg>
             <span>Profile</span>
           </Link>
+          
+          <Link 
+            href="/realtime" 
+            className={`${styles.navLink} ${activeTab === 'realtime' ? styles.active : ''}`}
+            onClick={() => {setActiveTab('realtime'); setIsMenuOpen(false);}}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.navIcon}>
+              <path d="M23 7l-7 5 7 5V7z"></path>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+            </svg>
+            <span>Realtime <sup className={styles.betaTag}>Beta</sup></span>
+          </Link>
+          
         </div>
       </nav>
       
@@ -205,6 +218,27 @@ export default function Home() {
               
               <Link href="/profile" className={styles.cardButton} style={{backgroundColor: '#14b8a6'}}>
                 View Profile
+              </Link>
+            </div>
+          </div>
+          
+          {/* Realtime Card */}
+          <div className={styles.card}>
+            <div className={styles.cardContent}>
+              <div className={styles.cardIcon} style={{backgroundColor: 'rgba(236, 72, 153, 0.2)', color: '#ec4899'}}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 7l-7 5 7 5V7z"></path>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+              </div>
+              
+              <h3>Realtime Assistant <span className={styles.betaTag}>Beta</span></h3>
+              <p>
+                Talk to a medical assistant in real-time using your camera and microphone.
+              </p>
+              
+              <Link href="/realtime" className={styles.cardButton} style={{backgroundColor: '#ec4899'}}>
+                Try Realtime
               </Link>
             </div>
           </div>
