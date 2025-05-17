@@ -184,5 +184,32 @@
     },
     "id": "1743002719682",
     "createdAt": "2025-03-26T15:25:19.682Z"
+  },
+  {
+    "email": "jwalin123@gmail.com",
+    "password": "$2b$10$e7WqR81gKh3KjvK28AziSOPaNIIr9Di/yPKiWwQctJEeJT1lQD8Au",
+    "name": "ram",
+    "gender": "male",
+    "age": "18",
+    "medicalData": {
+      "medicalHistory": "i am having cardiac arrest ",
+      "conditions": [
+        "diabetes"
+      ],
+      "medications": [],
+      "allergies": [
+        "milk"
+      ],
+      "vitalSigns": {
+        "heartRate": "67",
+        "bloodPressure": "",
+        "temperature": "104",
+        "bloodSugar": "",
+        "height": "",
+        "weight": ""
+      }
+    },
+    "id": "1743050976810",
+    "createdAt": "2025-03-27T04:49:36.810Z"
   }
 ]
